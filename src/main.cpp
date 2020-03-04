@@ -11,7 +11,7 @@ ros::Publisher pub;
 
 void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
 {
-    float64_t rotation = twist.angular.z;
+    double rotation = twist->angular.z;
 
     controller_msgs::MotorSignal motor;
     motor.leftMotor = (rotation > 0) ? -1 : 1;
