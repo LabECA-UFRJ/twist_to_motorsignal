@@ -22,7 +22,7 @@ void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv);
+    ros::init(argc, argv, "twist_to_motorsignal");
     ros::NodeHandle nodeHandle;
 
     pub = nodeHandle.advertise<controller_msgs::MotorSignal>("signal", 5);
