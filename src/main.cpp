@@ -5,6 +5,8 @@
 #include <iostream>
 #include <inttypes.h>
 
+#include <cmath>
+
 using namespace std;
 
 ros::Publisher pub;
@@ -16,6 +18,11 @@ void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
     controller_msgs::MotorSignal motor;
     motor.leftMotor = (rotation > 0) ? -1 : 1;
     motor.rightMotor = (rotation > 0) ? 1 : -1;
+
+    if (abs(rotation) <= 0.001) {
+        motor.leftMotor = 0;
+        motor.rightMotor = 0;
+    }
 
     pub.publish(motor);
 }
