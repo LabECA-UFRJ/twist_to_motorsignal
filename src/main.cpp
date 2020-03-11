@@ -31,11 +31,14 @@ void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
     motor.leftMotor = (rotation > 0) ? -1 : 1;
     motor.rightMotor = (rotation > 0) ? 1 : -1;
 
-    if (abs(rotation) <= 0.001)
+    if (abs(rotation) <= 0.01)
     {
         motor.leftMotor = 0;
         motor.rightMotor = 0;
     }
+
+    motor.leftMotor *= abs(rotation);
+    motor.rightMotor *= abs(rotation);
 
     motor.leftMotor = math::clamp(motor.leftMotor, -maxMotorOutput, maxMotorOutput);
     motor.rightMotor = math::clamp(motor.rightMotor, -maxMotorOutput, maxMotorOutput);
