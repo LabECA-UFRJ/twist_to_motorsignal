@@ -25,23 +25,28 @@ public:
 
 void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
 {
-    double rotation = twist->angular.z;
-
     controller_msgs::MotorSignal motor;
+    
+    double rotation = twist->angular.z;
     motor.leftMotor = (rotation > 0) ? -1 : 1;
     motor.rightMotor = (rotation > 0) ? 1 : -1;
-
-    if (abs(rotation) <= 0.01)
-    {
-        motor.leftMotor = 0;
-        motor.rightMotor = 0;
-    }
 
     motor.leftMotor *= abs(rotation);
     motor.rightMotor *= abs(rotation);
 
-    motor.leftMotor = math::clamp(motor.leftMotor, -maxMotorOutput, maxMotorOutput);
-    motor.rightMotor = math::clamp(motor.rightMotor, -maxMotorOutput, maxMotorOutput);
+    double linear = twist->linear.x;
+    motor.leftMotor += linear;
+    motor.rightMotor += linear;
+
+    double max = std::max(abs(motor.leftMotor), abs(motor.rightMotor));
+
+    if (max > maxMotorOutput) {
+        motor.leftMotor /= max / maxMotorOutput;
+        motor.rightMotor /= max / maxMotorOutput;
+    }
+
+    if (abs(motor.leftMotor) <= 0.01) motor.leftMotor = 0;
+    if (abs(motor.rightMotor) <= 0.01) motor.rightMotor = 0;
 
     pub.publish(motor);
 }
