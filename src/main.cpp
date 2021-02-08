@@ -1,10 +1,10 @@
-#include "ros/ros.h"
 #include "controller_msgs/MotorSignal.h"
 #include "geometry_msgs/Twist.h"
+#include "ros/ros.h"
 
-#include <iostream>
-#include <inttypes.h>
 #include <cmath>
+#include <inttypes.h>
+#include <iostream>
 
 using namespace std;
 
@@ -26,27 +26,16 @@ public:
 void twistReceived(const geometry_msgs::Twist::ConstPtr &twist)
 {
     controller_msgs::MotorSignal motor;
-    
-    double rotation = twist->angular.z;
-    motor.leftMotor = (rotation > 0) ? -1 : 1;
-    motor.rightMotor = (rotation > 0) ? 1 : -1;
 
-    motor.leftMotor *= abs(rotation);
-    motor.rightMotor *= abs(rotation);
+    double u = twist->linear.x;
+    double w = twist->angular.z;
 
-    double linear = twist->linear.x;
-    motor.leftMotor += linear;
-    motor.rightMotor += linear;
+    double r = 0.25;
+    double r_inv = 1 / r;
+    double L = 0.5;
 
-    double max = std::max(abs(motor.leftMotor), abs(motor.rightMotor));
-
-    if (max > maxMotorOutput) {
-        motor.leftMotor /= max / maxMotorOutput;
-        motor.rightMotor /= max / maxMotorOutput;
-    }
-
-    if (abs(motor.leftMotor) <= 0.01) motor.leftMotor = 0;
-    if (abs(motor.rightMotor) <= 0.01) motor.rightMotor = 0;
+    motor.leftMotor = r_inv * (u + 0.5 * L * w);
+    motor.rightMotor = r_inv * (u - 0.5 * L * w);
 
     pub.publish(motor);
 }
